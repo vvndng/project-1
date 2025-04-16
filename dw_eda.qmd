@@ -1,0 +1,20 @@
+---
+title: "EDA"
+---
+
+```{r}
+#| label: import packages
+
+library(tidyverse)
+library(janitor)
+```
+
+```{r}
+#| label: load dataset
+here::i_am("eda.qmd")
+
+socalrent <- read_csv(here::here("socalrent25.csv"))
+
+# plan: using both socal datasets, find what place is best deal for a college student.. do ranking? do eda by areas, sort by type, etc since numerical...
+
+```
