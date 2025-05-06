@@ -1,11 +1,12 @@
 project:
   type: website
+  output-dir: docs
   render: 
   - index.qmd
   - math-237-project_template.qmd
 
 website:
-  title: "project 1"
+  title: "Vivian's Portfolio"
   navbar:
     left:
       - href: index.qmd
@@ -15,7 +16,7 @@ website:
 format:
   html:
     theme: cosmo
-    css: styles.css
+    code-summary: "Show code"
     toc: true
 
 editor: visual
