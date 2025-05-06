@@ -1,0 +1,72 @@
+[
+  {
+    "objectID": "math-237-project_template.html",
+    "href": "math-237-project_template.html",
+    "title": "Eenie Meenie Miney Mo - Where Should I Go?",
+    "section": "",
+    "text": "we’re college students –&gt; maybe in near future, we need to find a place to stay for work, other school things, personal reasons, etc…\nrent searching is hard enough already –&gt; skip some of the hard work w/ these things! this is somewhat of a personal project b/c i have my own plans to move out soon :0"
+  },
+  {
+    "objectID": "math-237-project_template.html#motivation-and-context",
+    "href": "math-237-project_template.html#motivation-and-context",
+    "title": "Eenie Meenie Miney Mo - Where Should I Go?",
+    "section": "",
+    "text": "we’re college students –&gt; maybe in near future, we need to find a place to stay for work, other school things, personal reasons, etc…\nrent searching is hard enough already –&gt; skip some of the hard work w/ these things! this is somewhat of a personal project b/c i have my own plans to move out soon :0"
+  },
+  {
+    "objectID": "math-237-project_template.html#main-objective",
+    "href": "math-237-project_template.html#main-objective",
+    "title": "Eenie Meenie Miney Mo - Where Should I Go?",
+    "section": "Main Objective",
+    "text": "Main Objective\n\nautomate some of the work we need to do when deciding on a place to stay !\n\nfinding the “best” deal"
+  },
+  {
+    "objectID": "math-237-project_template.html#packages-used-in-this-analysis",
+    "href": "math-237-project_template.html#packages-used-in-this-analysis",
+    "title": "Eenie Meenie Miney Mo - Where Should I Go?",
+    "section": "Packages Used In This Analysis",
+    "text": "Packages Used In This Analysis\n\nlibrary(here)\nlibrary(tidyverse)\nlibrary(janitor)\nlibrary(broom)\n\n\n\n\nPackage\nUse\n\n\n\n\nhere\nto easily load and save data\n\n\nreadr\nto import the CSV file data\n\n\nsf\nto import and work with geojson files\n\n\njsonlite\nto work with json files\n\n\ndplyr\nto massage and summarize data"
+  },
+  {
+    "objectID": "math-237-project_template.html#design-and-data-collection",
+    "href": "math-237-project_template.html#design-and-data-collection",
+    "title": "Eenie Meenie Miney Mo - Where Should I Go?",
+    "section": "Design and Data Collection",
+    "text": "Design and Data Collection\n\ncollected w/ Nathalie in class from RedFin, compiled onto google sheets / microsoft excel –&gt; csv file\n\n\nsocalrent |&gt;\n  head() # so far so good, data looks ok except the 3 empty columns\n\n# A tibble: 6 × 10\n  Price     Beds   Baths     SqFt    Address      ...6  ...7  ...8  Type  County\n  &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;        &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; \n1 $3,195/mo 4 beds 2.5 baths 1668.00 4001 Landau… NA    NA    NA    house RIV   \n2 $4,000/mo 4 beds 2 baths   2200.00 18590 Rober… NA    NA    NA    house RIV   \n3 $2,300/mo 2 beds 1 bath    900.00  3468 Wallac… NA    NA    NA    house RIV   \n4 $3,449/mo 3 beds 2.5 baths 1,970   531 Atwood … NA    NA    NA    house RIV   \n5 $1,850/mo 1 bed  1 bath    400     2767 Attenb… NA    NA    NA    house RIV   \n6 $1,950/mo 1 bed  1 bath    440     10671 Sagit… NA    NA    NA    house RIV   \n\nsocalrent |&gt;\n  slice(265:266, 275:278) # some unusual observations... gotta clean that up\n\n# A tibble: 6 × 10\n  Price      Beds    Baths    SqFt      Address   ...6  ...7  ...8  Type  County\n  &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;     &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; \n1 $2,670+/mo 1-2 bed 1-2 bath —         | 2010 E… NA    NA    NA    apar… OC    \n2 $2,117+/mo 1-2 bed 1 bath   —         | 7545 K… NA    NA    NA    apar… OC    \n3 $2,480+/mo 1-2 bed 1-2 bath 548-942   &lt;NA&gt;      NA    NA    NA    apar… OC    \n4 $2,475+/mo 1-2 bed 1-2 bath 637-1,215 | 100 Vi… NA    NA    NA    apar… OC    \n5 $2,660+/mo 1-2 bed 1-2 bath 763-1,218 | 100 Si… NA    NA    NA    apar… OC    \n6 $2,545+/mo 1-2 bed 1-2 bath 706-1,100 &lt;NA&gt;      NA    NA    NA    apar… OC    \n\nsocalrent |&gt;\n  group_by(County, Type) |&gt;\n  count()\n\n# A tibble: 9 × 3\n# Groups:   County, Type [9]\n  County Type          n\n  &lt;chr&gt;  &lt;chr&gt;     &lt;int&gt;\n1 LA     apartment    38\n2 LA     condo        40\n3 LA     house        40\n4 OC     apartment    35\n5 OC     condo        39\n6 OC     house        39\n7 RIV    apartment    36\n8 RIV    condo        25\n9 RIV    house        41\n\nsocalrent |&gt;\n  filter(\n    Type == \"house\",\n    Beds &lt;= 1\n  )\n\n# A tibble: 3 × 10\n  Price     Beds   Baths  SqFt  Address           ...6  ...7  ...8  Type  County\n  &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;             &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; \n1 $1,675/mo 0 beds 1 bath 355   4317 Eileen St, … NA    NA    NA    house RIV   \n2 $1,650/mo 0 beds 1 bath 400   4928 3rd Ave, Lo… NA    NA    NA    house LA    \n3 $2,500/mo 0 beds 1 bath 455   2007 Chubasco Dr… NA    NA    NA    house OC"
+  },
+  {
+    "objectID": "math-237-project_template.html#data-massaging",
+    "href": "math-237-project_template.html#data-massaging",
+    "title": "Eenie Meenie Miney Mo - Where Should I Go?",
+    "section": "Data Massaging",
+    "text": "Data Massaging"
+  },
+  {
+    "objectID": "math-237-project_template.html#exploratory-data-analysis",
+    "href": "math-237-project_template.html#exploratory-data-analysis",
+    "title": "Eenie Meenie Miney Mo - Where Should I Go?",
+    "section": "Exploratory Data Analysis",
+    "text": "Exploratory Data Analysis"
+  },
+  {
+    "objectID": "math-237-project_template.html#modeling-optional-section",
+    "href": "math-237-project_template.html#modeling-optional-section",
+    "title": "Eenie Meenie Miney Mo - Where Should I Go?",
+    "section": "Modeling (Optional Section)",
+    "text": "Modeling (Optional Section)"
+  },
+  {
+    "objectID": "math-237-project_template.html#conclusion",
+    "href": "math-237-project_template.html#conclusion",
+    "title": "Eenie Meenie Miney Mo - Where Should I Go?",
+    "section": "Conclusion",
+    "text": "Conclusion\n\nLimitations\n\ndata collection / scraping off sites… difficult/tedious depending on OS used (Mac vs Windows)\ndata collected limited to “recommended” hits on Zillow (? dbl chk w/ Nat what site we used…)\nonly provides so much info and can only do so much work … other variables and processes assoc. w/ rent not accounted for\nintention for this project was to mainly avoid the math stuff of rent searching…\neveryone’s preferences are different when looking for a place to stay !\n\n\n\nReflection (Optional Subsection)"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "index",
+    "section": "",
+    "text": "Welcome!\nhome page**\nthis is my site:\nprojects:"
+  }
+]

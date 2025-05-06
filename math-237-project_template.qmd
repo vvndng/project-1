@@ -1,0 +1,97 @@
+---
+title: "Eenie Meenie Miney Mo - Where Should I Go?"
+author: "Vivian Duong"
+---
+
+## Motivation and Context
+
+-   we're college students –\> maybe in near future, we need to find a place to stay for work, other school things, personal reasons, etc...
+
+-   rent searching is hard enough already –\> skip some of the hard work w/ these things! this is somewhat of a personal project b/c i have my own plans to move out soon :0
+
+```{r}
+#| label: do this first
+#| echo: false
+#| message: false
+
+# change this to the location of your Quarto file containing your project; then delete this comment
+library(readr)
+here::i_am("project1/math-237-project_template.qmd")
+socalrent <- read_csv(here::here("project1/socal_raw.csv"))
+```
+
+## Main Objective
+
+-   automate some of the work we need to do when deciding on a place to stay !
+    -   finding the "best" deal
+
+## Packages Used In This Analysis
+
+```{r}
+#| label: load packages
+#| message: false
+#| warning: false
+
+library(here)
+library(tidyverse)
+library(janitor)
+library(broom)
+```
+
+| Package | Use |
+|--------------------------------|----------------------------------------|
+| [here](https://github.com/jennybc/here_here) | to easily load and save data |
+| [readr](https://readr.tidyverse.org/) | to import the CSV file data |
+| [sf](https://r-spatial.github.io/sf/) | to import and work with geojson files |
+| [jsonlite](https://jeroen.r-universe.dev/jsonlite) | to work with json files |
+| [dplyr](https://dplyr.tidyverse.org/) | to massage and summarize data |
+
+## Design and Data Collection
+
+-   collected w/ Nathalie in class from RedFin, compiled onto google sheets / microsoft excel –\> csv file
+
+```{r}
+#| label: preview dataset
+
+socalrent |>
+  head() # so far so good, data looks ok except the 3 empty columns
+
+socalrent |>
+  slice(265:266, 275:278) # some unusual observations... gotta clean that up
+
+socalrent |>
+  group_by(County, Type) |>
+  count()
+
+socalrent |>
+  filter(
+    Type == "house",
+    Beds <= 1
+  )
+```
+
+## Data Massaging
+
+```{r}
+
+```
+
+## Exploratory Data Analysis
+
+## Modeling (Optional Section)
+
+## Conclusion
+
+### Limitations
+
+-   data collection / scraping off sites... difficult/tedious depending on OS used (Mac vs Windows)
+
+-   data collected limited to "recommended" hits on Zillow (? dbl chk w/ Nat what site we used...)
+
+-   only provides so much info and can only do so much work ... other variables and processes assoc. w/ rent not accounted for
+
+-   intention for this project was to mainly avoid the math stuff of rent searching...
+
+-   everyone's preferences are different when looking for a place to stay !
+
+### Reflection (Optional Subsection)

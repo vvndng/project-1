@@ -1,0 +1,22 @@
+project:
+  type: website
+  render: 
+  - index.qmd
+  - math-237-project_template.qmd
+
+website:
+  title: "project 1"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: math-237-project_template.qmd
+        text: "Rent Project"
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+editor: visual
+
