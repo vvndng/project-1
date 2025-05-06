@@ -15,8 +15,7 @@ website:
         text: "Rent Project"
 format:
   html:
-    theme: cosmo
-    code-summary: "Show code"
+    theme: cosmos
     toc: true
 
 editor: visual
