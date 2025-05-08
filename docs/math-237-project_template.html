@@ -152,12 +152,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#design-and-data-collection" id="toc-design-and-data-collection" class="nav-link" data-scroll-target="#design-and-data-collection">Design and Data Collection</a></li>
   <li><a href="#data-massaging" id="toc-data-massaging" class="nav-link" data-scroll-target="#data-massaging">Data Massaging</a></li>
   <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory Data Analysis</a></li>
-  <li><a href="#modeling-optional-section" id="toc-modeling-optional-section" class="nav-link" data-scroll-target="#modeling-optional-section">Modeling (Optional Section)</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a>
-  <ul class="collapse">
-  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
-  <li><a href="#reflection-optional-subsection" id="toc-reflection-optional-subsection" class="nav-link" data-scroll-target="#reflection-optional-subsection">Reflection (Optional Subsection)</a></li>
-  </ul></li>
+  <li><a href="#conclusion-limitations" id="toc-conclusion-limitations" class="nav-link" data-scroll-target="#conclusion-limitations">Conclusion &amp; Limitations</a></li>
   </ul>
 </nav>
     </div>
@@ -191,19 +186,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="motivation-and-context" class="level2">
 <h2 class="anchored" data-anchor-id="motivation-and-context">Motivation and Context</h2>
-<ul>
-<li><p>we’re college students –&gt; maybe in near future, we need to find a place to stay for work, other school things, personal reasons, etc…</p></li>
-<li><p>rent searching is hard enough already –&gt; skip some of the hard work w/ these things! this is somewhat of a personal project b/c i have my own plans to move out soon :0</p></li>
-</ul>
+<p>As college students, many of us may choose to move out in the near future or are currently searching for places to stay for work, school, or personal reasons. Searching for a place is hard enough as it is already so with this project, I wanted to relieve some of the stress and perform some of the work with R, especially the math. Since I intend to have this project be used for my own personal reasons, I hope that it can be used to help make me make decisions easier.</p>
+<p>The data for this project includes the following variables: the monthly rent ($), number of bedrooms, number of bathrooms, the square footage of the housing unit, and its type. The full address and the county where the listing is located will also be included for reference.</p>
+<p>If the listing indicates “0 beds” AND is an apartment, it is considered a studio apartment. In my experience, it’s not unusual for a condo to share the living room, bedroom, and kitchen in one space but listings that are a house AND indicate “0 beds” should be investigated.</p>
 </section>
 <section id="main-objective" class="level2">
 <h2 class="anchored" data-anchor-id="main-objective">Main Objective</h2>
-<ul>
-<li>automate some of the work we need to do when deciding on a place to stay !
-<ul>
-<li>finding the “best” deal</li>
-</ul></li>
-</ul>
+<p>The main objective is to find the “best deal” of rental listings in the context of being an undergraduate student. For this project, I define “best deal” as a listing having negative residuals for monthly rent price compared to its expected values based on a linear regression model.</p>
 </section>
 <section id="packages-used-in-this-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="packages-used-in-this-analysis">Packages Used In This Analysis</h2>
@@ -211,74 +200,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rsample)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(yardstick)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Package</th>
-<th>Use</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="https://github.com/jennybc/here_here">here</a></td>
-<td>to easily load and save data</td>
-</tr>
-<tr class="even">
-<td><a href="https://readr.tidyverse.org/">readr</a></td>
-<td>to import the CSV file data</td>
-</tr>
-<tr class="odd">
-<td><a href="https://r-spatial.github.io/sf/">sf</a></td>
-<td>to import and work with geojson files</td>
-</tr>
-<tr class="even">
-<td><a href="https://jeroen.r-universe.dev/jsonlite">jsonlite</a></td>
-<td>to work with json files</td>
-</tr>
-<tr class="odd">
-<td><a href="https://dplyr.tidyverse.org/">dplyr</a></td>
-<td>to massage and summarize data</td>
-</tr>
-</tbody>
-</table>
 </section>
 <section id="design-and-data-collection" class="level2">
 <h2 class="anchored" data-anchor-id="design-and-data-collection">Design and Data Collection</h2>
-<ul>
-<li>collected w/ Nathalie in class from RedFin, compiled onto google sheets / microsoft excel –&gt; csv file</li>
-</ul>
+<p>The data was collected from Redfin with Excel. Orange County (OC), Los Angeles County (LA), and Riverside County (RIV) were entered into Redfin’s search unter the “Rent” tab. Based on Redfin’s search filter, only house, apartment, and condo were selected since a college student is unlikely to be renting a townhome under “hometype.” The URL was copied after each separate search. Using the Power Query’s “From Web” function, we can connect to the Redfin website with the URL and from there, specific information (such as the aforementioned variables) can be selected before loading our data onto a spreadsheet. I thank Natalie for her help in importing the data as I was limited by MacOS in which Excel did not have this function.</p>
+<p>It must be noted that the data was collected from Redfin’s recommended hits. There is no way of knowing what algorithm or criteria was used to determine what listings get pushed to “Recommended” unfortunately. It may as well be a combination of all the other sort options, such as price (low to high/high to low), square feet, beds, baths, newest, and/or oldest listings. It is unlikely Redfin will tell us how they choose what gets recommended or not but I would not be surprised if our data was skewed in some way to prefer a specific “type” of listing, whatever that entails. There was also no way to make sure that the data was representative of the entire county, such as performing stratified sampling so that the number of listings from each city was proportional to the city’s size in the county.</p>
+<p>I acknowledge that the method of data collection may limit the analysis and conclusion but the context of this project is from the perspective of an undergraduate student. If we consider the realities for a majority of this demographic, especially in the financial sense, there is little space to be “picky” and I also expect that not many individuals will know what they want, especially if it is their first time searching. Therefore, unless an individual knows exactly what they want, the recommended listings is the best (although default) sort option for now. The project was designed to be “general” and can be customized according to individual preferences, if any.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>socalrent <span class="sc">|&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>() <span class="co"># so far so good, data looks ok except the 3 empty columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 10
-  Price     Beds   Baths     SqFt    Address      ...6  ...7  ...8  Type  County
-  &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;        &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; 
-1 $3,195/mo 4 beds 2.5 baths 1668.00 4001 Landau… NA    NA    NA    house RIV   
-2 $4,000/mo 4 beds 2 baths   2200.00 18590 Rober… NA    NA    NA    house RIV   
-3 $2,300/mo 2 beds 1 bath    900.00  3468 Wallac… NA    NA    NA    house RIV   
-4 $3,449/mo 3 beds 2.5 baths 1,970   531 Atwood … NA    NA    NA    house RIV   
-5 $1,850/mo 1 bed  1 bath    400     2767 Attenb… NA    NA    NA    house RIV   
-6 $1,950/mo 1 bed  1 bath    440     10671 Sagit… NA    NA    NA    house RIV   </code></pre>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>socalrent <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"project1/socal_raw.csv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+Rows: 333 Columns: 10
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: "," chr
+(7): Price, Beds, Baths, SqFt, Address, Type, County lgl (3): ...6, ...7, ...8
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...6`
+• `` -&gt; `...7`
+• `` -&gt; `...8`</code></pre>
 </div>
+</div>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>socalrent <span class="sc">|&gt;</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">265</span><span class="sc">:</span><span class="dv">266</span>, <span class="dv">275</span><span class="sc">:</span><span class="dv">278</span>) <span class="co"># some unusual observations... gotta clean that up</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 10
-  Price      Beds    Baths    SqFt      Address   ...6  ...7  ...8  Type  County
-  &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;     &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; 
-1 $2,670+/mo 1-2 bed 1-2 bath —         |&nbsp;2010 E… NA    NA    NA    apar… OC    
-2 $2,117+/mo 1-2 bed 1 bath   —         |&nbsp;7545 K… NA    NA    NA    apar… OC    
-3 $2,480+/mo 1-2 bed 1-2 bath 548-942   &lt;NA&gt;      NA    NA    NA    apar… OC    
-4 $2,475+/mo 1-2 bed 1-2 bath 637-1,215 |&nbsp;100 Vi… NA    NA    NA    apar… OC    
-5 $2,660+/mo 1-2 bed 1-2 bath 763-1,218 |&nbsp;100 Si… NA    NA    NA    apar… OC    
-6 $2,545+/mo 1-2 bed 1-2 bath 706-1,100 &lt;NA&gt;      NA    NA    NA    apar… OC    </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>socalrent <span class="sc">|&gt;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(County, Type) <span class="sc">|&gt;</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(County, Type) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">count</span>() <span class="co"># displays number of each type of listing in each county</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 9 × 3
 # Groups:   County, Type [9]
@@ -294,11 +244,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 8 RIV    condo        25
 9 RIV    house        41</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>socalrent <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>() <span class="co"># preview first few observations, note the empty columns </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 10
+  Price     Beds   Baths     SqFt    Address      ...6  ...7  ...8  Type  County
+  &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;        &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; 
+1 $3,195/mo 4 beds 2.5 baths 1668.00 4001 Landau… NA    NA    NA    house RIV   
+2 $4,000/mo 4 beds 2 baths   2200.00 18590 Rober… NA    NA    NA    house RIV   
+3 $2,300/mo 2 beds 1 bath    900.00  3468 Wallac… NA    NA    NA    house RIV   
+4 $3,449/mo 3 beds 2.5 baths 1,970   531 Atwood … NA    NA    NA    house RIV   
+5 $1,850/mo 1 bed  1 bath    400     2767 Attenb… NA    NA    NA    house RIV   
+6 $1,950/mo 1 bed  1 bath    440     10671 Sagit… NA    NA    NA    house RIV   </code></pre>
+</div>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>socalrent <span class="sc">|&gt;</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    Type <span class="sc">==</span> <span class="st">"house"</span>,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    Beds <span class="sc">&lt;=</span> <span class="dv">1</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">265</span><span class="sc">:</span><span class="dv">266</span>, <span class="dv">275</span><span class="sc">:</span><span class="dv">278</span>) <span class="co"># note missing info and strings </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 10
+  Price      Beds    Baths    SqFt      Address   ...6  ...7  ...8  Type  County
+  &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;     &lt;lgl&gt; &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt; &lt;chr&gt; 
+1 $2,670+/mo 1-2 bed 1-2 bath —         |&nbsp;2010 E… NA    NA    NA    apar… OC    
+2 $2,117+/mo 1-2 bed 1 bath   —         |&nbsp;7545 K… NA    NA    NA    apar… OC    
+3 $2,480+/mo 1-2 bed 1-2 bath 548-942   &lt;NA&gt;      NA    NA    NA    apar… OC    
+4 $2,475+/mo 1-2 bed 1-2 bath 637-1,215 |&nbsp;100 Vi… NA    NA    NA    apar… OC    
+5 $2,660+/mo 1-2 bed 1-2 bath 763-1,218 |&nbsp;100 Si… NA    NA    NA    apar… OC    
+6 $2,545+/mo 1-2 bed 1-2 bath 706-1,100 &lt;NA&gt;      NA    NA    NA    apar… OC    </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>socalrent <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    Type <span class="sc">==</span> <span class="st">"house"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    Beds <span class="sc">&lt;=</span> <span class="dv">1</span> <span class="co"># based on previous assumptions, a house should not have 0 bedrooms</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 10
   Price     Beds   Baths  SqFt  Address           ...6  ...7  ...8  Type  County
@@ -311,30 +287,208 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="data-massaging" class="level2">
 <h2 class="anchored" data-anchor-id="data-massaging">Data Massaging</h2>
+<p>Based on what we saw in the previews, there is significant cleaning to be done, especially with strings. Below are the steps taken with an explanation beside somes lines of code.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>clean_socal <span class="ot">&lt;-</span> socalrent <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Price, Beds, Baths, SqFt, Address, Type, County) <span class="sc">|&gt;</span> <span class="co"># removes empty columns</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">SqFt =</span> <span class="fu">str_replace_all</span>(SqFt, <span class="st">"—"</span>, <span class="cn">NA_character_</span>), <span class="co"># changes dashes to NA</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(<span class="fu">c</span>(SqFt, Address)) <span class="sc">|&gt;</span> <span class="co"># drop all observations w/ missing info</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    Address <span class="sc">!=</span> <span class="fu">c</span>(<span class="st">"4317 Eileen St, Riverside, CA 92504"</span>, <span class="st">"4928 3rd Ave, Los Angeles, CA 90043"</span>, <span class="st">"2007 Chubasco Dr Unit A, Corona Del Mar, CA 92625"</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="co"># remove the listings that were a house w/ 0 beds based on previews</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: There was 1 warning in `filter()`.
+ℹ In argument: `!=...`.
+Caused by warning in `Address != c("4317 Eileen St, Riverside, CA 92504",
+    "4928 3rd Ave, Los Angeles, CA 90043",
+    "2007 Chubasco Dr Unit A, Corona Del Mar, CA 92625")`:
+! longer object length is not a multiple of shorter object length</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>clean_socal <span class="ot">&lt;-</span> clean_socal <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">Price =</span> <span class="fu">str_remove</span>(Price, <span class="st">","</span>), <span class="co"># remove commas</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Price =</span> <span class="fu">str_extract_all</span>(Price, <span class="st">"[0-9]+"</span>), <span class="co"># only want numerical values</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Price =</span> <span class="fu">as.numeric</span>(Price), <span class="co"># turn char -&gt; num</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Beds =</span> <span class="fu">str_extract</span>(Beds, <span class="st">"[0-9]+"</span>), <span class="co"># only include 1st element in the range</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Beds =</span> <span class="fu">as.numeric</span>(Beds),</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Baths =</span> <span class="fu">str_extract</span>(Baths, <span class="st">"</span><span class="sc">\\</span><span class="st">d+</span><span class="sc">\\</span><span class="st">.*</span><span class="sc">\\</span><span class="st">d*"</span>), <span class="co"># includes decimals</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">Baths =</span> <span class="fu">as.numeric</span>(Baths), </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">SqFt =</span> <span class="fu">str_remove</span>(SqFt, <span class="st">","</span>),</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">SqFt =</span> <span class="fu">str_extract</span>(SqFt, <span class="st">"[0-9]+"</span>), </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">SqFt =</span> <span class="fu">as.numeric</span>(SqFt)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="exploratory-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h2>
+<p>Now that our data has been cleaned, it is now suitable for exploratory analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>clean_socal <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(County) <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Min =</span> <span class="fu">min</span>(Price),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">1st Quartile</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">quantile</span>(Price, <span class="fl">0.25</span>),</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Median =</span> <span class="fu">median</span>(Price),</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">3rd Quartile</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">quantile</span>(Price, <span class="fl">0.75</span>),</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Max =</span> <span class="fu">max</span>(Price)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 6
+  County   Min `1st Quartile` Median `3rd Quartile`   Max
+  &lt;chr&gt;  &lt;dbl&gt;          &lt;dbl&gt;  &lt;dbl&gt;          &lt;dbl&gt; &lt;dbl&gt;
+1 LA       750          2558    3500          4997  20000
+2 OC      1500          2525    3988          6250  30000
+3 RIV      899          1929.   2350          3238.  5000</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>clean_socal <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">price_ratio =</span> Price<span class="sc">/</span>SqFt</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(County, Type) <span class="sc">|&gt;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Mean Price/SqFt</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">mean</span>(price_ratio), <span class="at">digits =</span> <span class="dv">2</span>),</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">SD Price/SqFt</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">sd</span>(price_ratio), <span class="at">digits =</span> <span class="dv">2</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'County'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 9 × 4
+# Groups:   County [3]
+  County Type      `Mean Price/SqFt` `SD Price/SqFt`
+  &lt;chr&gt;  &lt;chr&gt;                 &lt;dbl&gt;           &lt;dbl&gt;
+1 LA     apartment              3.97            0.97
+2 LA     condo                  3.11            0.94
+3 LA     house                  3.77            1.57
+4 OC     apartment              3.65            0.64
+5 OC     condo                  3.68            1.64
+6 OC     house                  3.37            2.11
+7 RIV    apartment              2.75            0.66
+8 RIV    condo                  2.12            0.43
+9 RIV    house                  2.3             0.88</code></pre>
+</div>
+</div>
+<p>As we can see from the both chunks, RIV is on the lower end in terms of monthly rent. The reason could be that the area has not gone through much development and has older buildings mainly. It is not surprising to see LA and OC on the higher end of the scale. LA in general is expensive to live in while OC has a number of new developments, notably Irvine. From the first chunk, a monthly rent of $20000 and $30000 is outrageous. We’ll deal with this in a later step.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>clean_socal <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">price_ratio =</span> Price<span class="sc">/</span>SqFt</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> price_ratio)) <span class="sc">+</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>   <span class="co"># center = 1, </span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>   <span class="at">binwidth =</span> <span class="fl">0.5</span>, </span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>   <span class="at">fill =</span> <span class="st">"#336699"</span>, </span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">color =</span> <span class="st">"white"</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span> <span class="fu">labs</span>(</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distribution of Price/SqFt Ratio in LA, OC, &amp; RIV County Rent Listings"</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Price/SqFt Ratio"</span>, </span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Count"</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">xintercept =</span> <span class="dv">6</span>, </span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">xintercept =</span> <span class="dv">1</span>,</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, </span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>           <span class="at">x =</span> <span class="dv">7</span>, </span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> <span class="dv">17</span>, </span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>           <span class="at">label =</span> <span class="st">"Observations outside of dashed </span><span class="sc">\n</span><span class="st">lines should be investigated"</span>,</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>           <span class="at">hjust =</span> <span class="dv">0</span>,</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>           <span class="at">vjust =</span> <span class="fl">0.5</span>,</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>           <span class="at">size =</span> <span class="dv">10</span>, </span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>           <span class="at">size.unit =</span> <span class="st">"pt"</span>,</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="math-237-project_template_files/figure-html/visualize data-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The best way to eliminate unusually expensive (or inexpensive) listings is by looking at the Price per SqFt ratio. Obviously, unusually expensive listings should be removed because that would be out of the budget or (unless there’s a good reason) we might be getting “ripped off” for lack of a better word. Unusually INEXPENSIVE listings are suspicious, warranting further investigation. For now, based on our judgement calls these listings will be excluded so as to not skew our linear regression model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>clean_socal <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">price_ratio =</span> Price<span class="sc">/</span>SqFt</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    price_ratio <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> price_ratio <span class="sc">&lt;=</span> <span class="dv">6</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> SqFt, <span class="at">y =</span> Price)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">color =</span> <span class="st">"purple"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Relationship between Price vs SqFt"</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="math-237-project_template_files/figure-html/visualize (assumed) linear relationship-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The resulting linear regression model will look like this. The $20000 listing was not excluded from our filtering. We can continue to remove listings that are outside of our budget but the more we continue to remove, the more skewed our model may be. For the most part however, there is a positive, moderately strong correlation between SqFt as a predictor of Price.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>linreg <span class="ot">&lt;-</span> <span class="fu">lm</span>(Price <span class="sc">~</span> SqFt, <span class="at">data =</span> clean_socal)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>clean_socal <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">price_ratio =</span> Price<span class="sc">/</span>SqFt,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">pricediff =</span> linreg<span class="sc">$</span>residuals</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    price_ratio <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> price_ratio <span class="sc">&lt;=</span> <span class="dv">6</span>,</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    pricediff <span class="sc">&lt;=</span> <span class="dv">0</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(pricediff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 177 × 9
+   Price  Beds Baths  SqFt Address            Type  County price_ratio pricediff
+   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;              &lt;chr&gt; &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;
+ 1  4200     5   4.5  3685 19737 Country Ros… house RIV           1.14    -5903.
+ 2  3900     4   3    3111 8515 McAlpine Ln,… house RIV           1.25    -4728.
+ 3  3790     4   3    2950 17346 Cold Spring… house RIV           1.28    -4424.
+ 4  4100     5   3    2700 4541 Brandi Ln, R… house RIV           1.52    -3472.
+ 5  4650     5   3    2909 16392 Fair Ridge … house RIV           1.60    -3459.
+ 6  3395     4   3.5  2100 4054 Boulder Dr, … condo RIV           1.62    -2635.
+ 7  5000     5   3    2700 2210 Trafalgar Av… house RIV           1.85    -2572.
+ 8  5300     4   3    2792 2161 S Middlecoff… house OC            1.90    -2508.
+ 9  3500     3   2.5  2046 1623 Palermo Dr, … house RIV           1.71    -2391.
+10  4000     4   2    2200 18590 Roberts Rd,… house RIV           1.82    -2287.
+# ℹ 167 more rows</code></pre>
+</div>
+</div>
+<p>After creating our model, we can now compare the actual monthly rent to the predicted by calculating the residuals. A negative residual would indicate that the actual value is less than the predicted, which I defined as a “deal” earlier. If it was equal to zero, that would mean the actual value matches the predicted.</p>
 </section>
-<section id="modeling-optional-section" class="level2">
-<h2 class="anchored" data-anchor-id="modeling-optional-section">Modeling (Optional Section)</h2>
-</section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<section id="limitations" class="level3">
-<h3 class="anchored" data-anchor-id="limitations">Limitations</h3>
-<ul>
-<li><p>data collection / scraping off sites… difficult/tedious depending on OS used (Mac vs Windows)</p></li>
-<li><p>data collected limited to “recommended” hits on Zillow (? dbl chk w/ Nat what site we used…)</p></li>
-<li><p>only provides so much info and can only do so much work … other variables and processes assoc. w/ rent not accounted for</p></li>
-<li><p>intention for this project was to mainly avoid the math stuff of rent searching…</p></li>
-<li><p>everyone’s preferences are different when looking for a place to stay !</p></li>
-</ul>
-</section>
-<section id="reflection-optional-subsection" class="level3">
-<h3 class="anchored" data-anchor-id="reflection-optional-subsection">Reflection (Optional Subsection)</h3>
+<section id="conclusion-limitations" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-limitations">Conclusion &amp; Limitations</h2>
+<p>If I was actually looking for a place to rent, I would choose:</p>
+<p><img src="images/Screenshot 2025-05-08 at 12.54.16.png" class="img-fluid"></p>
+<p>With a starting price of $1596 for 0 beds (studio apartment) and 1 bath, the calculated residual was approximately $766. Personally, saving on $766 on rent is pretty good. Realistically, having a roommate to split the payment is probably a good idea. If I was working full-time for roughly $18/hr, I would not be opposed to spending half my income on rent but that’s just me.</p>
+<p>After completing this project, I learned that R is an excellent calculator, especially for handling big amounts of data. I would take advantage of this if I was a real estate agent. However, if I was the average person who did not know how to utilize R, Redfin’s built-in search filters are probably better and easier to use.</p>
+<p>However, there is more to be considered than just the numbers, especially in the context of this project. There is a strong assumption throughout the project of a linear relationship between Price and SqFt. While SqFt may be a strong predictor of Price, realistically it cannot be the ONLY predictor. While I am driven by numbers, other may also consider the location of the listing and its surroundings (near a school, park, shopping plaza, etc.), public transportation, pet friendliness, appearance of the listing (both exterior and interior), neighborhood safety, amenities, and the list goes on. As stated previously, this project does not account for all variables that are typically considered when searching for a place which is why it remains very “generalized” and is meant to relieve some burden.</p>
+<p>We should also address that the dataset is quite literally stuck in time, only displaying information from the day it was collected. Since this project spanned over several weeks, listings have updated in price or have been removed. Interestingly, I found one listing that was supposedly up for rent but when I referenced back on Redfin, it had been bought out since 2019. Several other listings were apparently “off the market.”</p>
+<p>Furthermore, we have a moral duty to follow Redfin’s (or any other site) rules when it comes to web scraping. We should be mindful of data privacy laws and regulations, only handling publicly available information and avoid private or sensitive data. We must also be aware of the frequency that we scrape from sites as it could lead to site overload and crashes, affecting both the site owners and the people who use it. Otherwise, we may be faced with legal consequences (and nobody likes that). When in doubt, review the terms of service prior to performing any web scraping.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

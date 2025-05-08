@@ -1,11 +1,5 @@
 ---
-title: "index"
+title: "Welcome!"
 ---
 
-Welcome!
-
-home page\*\*
-
-this is my site:
-
-projects:
+This is the home page.

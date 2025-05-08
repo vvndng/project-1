@@ -1,3 +1,3 @@
 # portfolio
 
-**this link: <https://vvndng.github.io/project-1/>**
+**Link to projects: <https://vvndng.github.io/project-1/>**
