@@ -228,7 +228,7 @@ After creating our model, we can now compare the actual monthly rent to the pred
 
 If I was actually looking for a place to rent, I would choose:
 
-![](images/Screenshot 2025-05-08 at 12.54.16.png)
+![](images/Screenshot%202025-05-08%20at%2012.54.16.png)
 
 With a starting price of \$1596 for 0 beds (studio apartment) and 1 bath, the calculated residual was approximately \$766. Personally, saving on \$766 on rent is pretty good. Realistically, having a roommate to split the payment is probably a good idea. If I was working full-time for roughly \$18/hr, I would not be opposed to spending half my income on rent but that's just me.
 
